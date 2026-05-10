@@ -4,15 +4,19 @@ import { Plus, Edit } from "lucide-react"
 import { createServerDataClient } from "@/lib/supabase/server-data"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { formatPrice } from "@/lib/utils"
 import { T } from "@/components/t"
 import { DeleteButton } from "./delete-button"
+import { formatPrice } from "@/lib/utils"
 import type { Product } from "@/types"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminProductsPage() {
   const supabase = createServerDataClient()
+  const { data: settings } = await supabase.from("store_settings").select("key, value")
+  const settingsMap: Record<string, string> = {}
+  if (settings) for (const row of settings) settingsMap[row.key] = row.value
+  const sdgRate = parseFloat(settingsMap.store_sdg_rate || "600")
   const { data: products } = await supabase
     .from("products")
     .select("*, categories(*)")
@@ -78,7 +82,7 @@ export default async function AdminProductsPage() {
                     {product.categories?.name || "-"}
                   </td>
                   <td className="py-3 px-4 text-right font-medium">
-                    {formatPrice(Number(product.price))}
+                    {formatPrice(Number(product.price), sdgRate)}
                   </td>
                   <td className="py-3 px-4 text-right hidden sm:table-cell">
                     {product.stock_quantity <= 0 ? (

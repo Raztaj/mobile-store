@@ -5,6 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPrice(price: number): string {
-  return `${price.toLocaleString()} ${process.env.NEXT_PUBLIC_STORE_CURRENCY || "USD"}`
+export function formatPrice(price: number, sdgRate?: number): string {
+  const rate = sdgRate || 600
+  return `${(price * rate).toLocaleString()} SDG`
 }

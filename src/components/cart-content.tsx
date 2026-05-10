@@ -10,10 +10,12 @@ import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/lib/store/cart"
 import { generateWhatsAppMessage } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
+import { useSdgRate } from "@/components/sdg-rate-provider"
 
 export function CartContent() {
   const { items, removeItem, updateQuantity, clearCart, getSubtotal } = useCart()
   const { t } = useTranslation()
+  const sdgRate = useSdgRate()
   const [phone, setPhone] = useState("+249123456789")
 
   useEffect(() => {
@@ -82,7 +84,7 @@ export function CartContent() {
                 <div className="min-w-0">
                   <p className="font-medium truncate">{item.name}</p>
                   <p className="text-sm font-semibold mt-0.5">
-                    {formatPrice(item.price * item.quantity)}
+                    {formatPrice(item.price * item.quantity, sdgRate)}
                   </p>
                 </div>
                 <button
@@ -120,7 +122,7 @@ export function CartContent() {
       <div className="space-y-4 pt-2">
         <div className="flex justify-between text-lg">
           <span className="text-muted-foreground">{t("cart.subtotal")}</span>
-          <span className="font-bold">{formatPrice(subtotal)}</span>
+          <span className="font-bold">{formatPrice(subtotal, sdgRate)}</span>
         </div>
 
         <a

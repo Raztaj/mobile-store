@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/lib/store/cart"
 import { useTranslation } from "@/lib/i18n"
+import { useSdgRate } from "@/components/sdg-rate-provider"
 import type { Product } from "@/types"
 
 interface ProductCardProps {
@@ -18,6 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCart((s) => s.addItem)
   const openCart = useCart((s) => s.openCart)
   const { t } = useTranslation()
+  const sdgRate = useSdgRate()
   const outOfStock = product.stock_quantity <= 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -71,7 +73,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
         <p className="font-bold text-base">
-          {formatPrice(Number(product.price))}
+          {formatPrice(Number(product.price), sdgRate)}
         </p>
       </div>
 

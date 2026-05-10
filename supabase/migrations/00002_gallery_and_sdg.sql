@@ -12,15 +12,18 @@ CREATE INDEX IF NOT EXISTS idx_product_images_sort ON product_images(product_id,
 
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Product images are publicly readable"
+DROP POLICY IF EXISTS "Product images are publicly readable" ON product_images;
+CREATE POLICY "Product images are publicly readable"
   ON product_images FOR SELECT
   USING (true);
 
-CREATE POLICY IF NOT EXISTS "Admins can insert product images"
+DROP POLICY IF EXISTS "Admins can insert product images" ON product_images;
+CREATE POLICY "Admins can insert product images"
   ON product_images FOR INSERT
   WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY IF NOT EXISTS "Admins can delete product images"
+DROP POLICY IF EXISTS "Admins can delete product images" ON product_images;
+CREATE POLICY "Admins can delete product images"
   ON product_images FOR DELETE
   USING (auth.role() = 'authenticated');
 

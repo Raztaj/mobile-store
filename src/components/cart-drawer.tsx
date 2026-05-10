@@ -7,11 +7,13 @@ import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/lib/store/cart"
 import { generateWhatsAppMessage } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
+import { useSdgRate } from "@/components/sdg-rate-provider"
 import { useEffect, useState } from "react"
 
 export function CartDrawer() {
   const { items, isCartOpen, closeCart, removeItem, updateQuantity, clearCart, getSubtotal } = useCart()
   const { t } = useTranslation()
+  const sdgRate = useSdgRate()
   const [phone, setPhone] = useState("+249123456789")
   const [isClosing, setIsClosing] = useState(false)
 
@@ -113,7 +115,7 @@ export function CartDrawer() {
                     </div>
 
                     <p className="text-sm font-semibold">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice(item.price * item.quantity, sdgRate)}
                     </p>
 
                     <div className="flex items-center gap-1">
@@ -141,7 +143,7 @@ export function CartDrawer() {
             <div className="border-t px-5 py-4 space-y-3">
               <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">{t("cart.subtotal")}</span>
-                <span className="font-bold text-lg">{formatPrice(subtotal)}</span>
+                <span className="font-bold text-lg">{formatPrice(subtotal, sdgRate)}</span>
               </div>
 
               <a

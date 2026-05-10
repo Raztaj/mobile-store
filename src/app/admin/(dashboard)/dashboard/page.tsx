@@ -2,13 +2,14 @@ import { createServerDataClient } from "@/lib/supabase/server-data"
 import { Package, ShoppingBag, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { T } from "@/components/t"
+import { DashboardPhone } from "@/components/admin/dashboard-phone"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminDashboardPage() {
   const supabase = createServerDataClient()
 
-  const [prodCount, catCount, lowStock] = await Promise.all([
+  const [prodCount, catCount, lowStock, settings] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
     supabase
@@ -16,7 +17,11 @@ export default async function AdminDashboardPage() {
       .select("*")
       .lte("stock_quantity", 5)
       .gt("stock_quantity", 0),
+    supabase.from("store_settings").select("key, value"),
   ])
+
+  const settingsMap: Record<string, string> = {}
+  if (settings.data) for (const row of settings.data) settingsMap[row.key] = row.value
 
   return (
     <div className="space-y-6">
@@ -60,6 +65,8 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <DashboardPhone phone={settingsMap.store_phone || "+249123456789"} />
     </div>
   )
 }

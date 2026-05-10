@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { formatPrice } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
+import { useSdgRate } from "@/components/sdg-rate-provider"
 import type { Product } from "@/types"
 
 interface FeaturedCarouselProps {
@@ -14,6 +15,7 @@ interface FeaturedCarouselProps {
 
 export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
   const { t } = useTranslation()
+  const sdgRate = useSdgRate()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const scroll = (dir: "left" | "right") => {
@@ -67,7 +69,7 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
                 {product.name}
               </h3>
               <p className="font-bold text-sm">
-                {formatPrice(Number(product.price))}
+                {formatPrice(Number(product.price), sdgRate)}
               </p>
             </div>
           </Link>

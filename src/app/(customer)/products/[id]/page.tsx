@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createServerDataClient } from "@/lib/supabase/server-data"
 import { AddToCartButton } from "./add-to-cart-button"
-import { formatPriceUSD, formatPriceSDG } from "@/lib/hooks/format-price"
+import { formatPrice } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -26,7 +26,7 @@ async function getProduct(id: string) {
       settings[row.key] = row.value
     }
   }
-  return { product, sdgRate: parseFloat(settings.store_sdg_rate || "0") }
+  return { product, sdgRate: parseFloat(settings.store_sdg_rate || "600") }
 }
 
 export async function generateMetadata({
@@ -102,13 +102,8 @@ export default async function ProductPage({
             <h1 className="text-2xl sm:text-3xl font-bold">{product.name}</h1>
             <div className="mt-3">
               <p className="text-3xl font-bold text-primary">
-                {formatPriceUSD(Number(product.price))}
+                {formatPrice(Number(product.price), sdgRate)}
               </p>
-              {sdgRate > 0 && (
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {formatPriceSDG(Number(product.price))}
-                </p>
-              )}
             </div>
           </div>
 
