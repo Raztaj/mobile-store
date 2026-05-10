@@ -1,0 +1,109 @@
+import Link from "next/link"
+import Image from "next/image"
+import { Plus, Edit, Trash2 } from "lucide-react"
+import { createServerDataClient } from "@/lib/supabase/server-data"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { formatPrice } from "@/lib/utils"
+import { DeleteButton } from "./delete-button"
+import type { Product } from "@/types"
+
+export const dynamic = "force-dynamic"
+
+export default async function AdminProductsPage() {
+  const supabase = createServerDataClient()
+  const { data: products } = await supabase
+    .from("products")
+    .select("*, categories(*)")
+    .order("created_at", { ascending: false })
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Products</h1>
+        <Link href="/admin/products/new">
+          <Button className="gap-1">
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+        </Link>
+      </div>
+
+      <div className="rounded-lg border">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left py-3 px-4 font-medium">Product</th>
+                <th className="text-left py-3 px-4 font-medium hidden sm:table-cell">Category</th>
+                <th className="text-right py-3 px-4 font-medium">Price</th>
+                <th className="text-right py-3 px-4 font-medium hidden sm:table-cell">Stock</th>
+                <th className="text-right py-3 px-4 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(!products || products.length === 0) && (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                    No products yet
+                  </td>
+                </tr>
+              )}
+              {products?.map((product: Product) => (
+                <tr key={product.id} className="border-b">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
+                        {product.image_url ? (
+                          <Image
+                            src={product.image_url}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                            --
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{product.name}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 hidden sm:table-cell text-muted-foreground">
+                    {product.categories?.name || "-"}
+                  </td>
+                  <td className="py-3 px-4 text-right font-medium">
+                    {formatPrice(Number(product.price))}
+                  </td>
+                  <td className="py-3 px-4 text-right hidden sm:table-cell">
+                    {product.stock_quantity <= 0 ? (
+                      <Badge variant="destructive">Out of Stock</Badge>
+                    ) : product.stock_quantity <= 5 ? (
+                      <Badge variant="outline">{product.stock_quantity}</Badge>
+                    ) : (
+                      <span>{product.stock_quantity}</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link href={`/admin/products/${product.id}/edit`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <DeleteButton id={product.id} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
