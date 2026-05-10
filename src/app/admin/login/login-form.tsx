@@ -14,7 +14,9 @@ export function LoginForm() {
       try {
         await login(formData)
       } catch (e) {
-        return { error: (e as Error).message }
+        const err = e as Error & { digest?: string }
+        if (err.digest === "NEXT_REDIRECT") throw e
+        return { error: err.message }
       }
     },
     null

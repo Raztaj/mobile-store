@@ -33,7 +33,9 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       try {
         await action(formData)
       } catch (e) {
-        return { error: (e as Error).message }
+        const err = e as Error & { digest?: string }
+        if (err.digest === "NEXT_REDIRECT") throw e
+        return { error: err.message }
       }
       return null
     },
