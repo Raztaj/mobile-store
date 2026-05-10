@@ -18,6 +18,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const [phone, setPhone] = useState(settings.store_phone || "")
   const [name, setName] = useState(settings.store_name || "")
   const [currency, setCurrency] = useState(settings.store_currency || "USD")
+  const [sdgRate, setSdgRate] = useState(settings.store_sdg_rate || "")
   const [heroTitleAr, setHeroTitleAr] = useState(settings.hero_title_ar || "")
   const [heroTitleEn, setHeroTitleEn] = useState(settings.hero_title_en || "")
   const [heroDescAr, setHeroDescAr] = useState(settings.hero_desc_ar || "")
@@ -37,6 +38,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           store_phone: phone,
           store_name: name,
           store_currency: currency,
+          store_sdg_rate: sdgRate,
           hero_title_ar: heroTitleAr,
           hero_title_en: heroTitleEn,
           hero_desc_ar: heroDescAr,
@@ -89,6 +91,18 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             onChange={(e) => setCurrency(e.target.value)}
             placeholder="USD"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="sdg_rate">SDG Rate (1 USD = ? SDG)</Label>
+          <Input
+            id="sdg_rate"
+            value={sdgRate}
+            onChange={(e) => setSdgRate(e.target.value)}
+            placeholder="600"
+            type="number"
+          />
+          <p className="text-xs text-muted-foreground">Leave empty to hide SDG prices</p>
         </div>
       </div>
 

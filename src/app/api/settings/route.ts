@@ -20,6 +20,7 @@ export async function GET() {
     phone: settings.store_phone || "+249123456789",
     name: settings.store_name || "Sudanese Mobile Store",
     currency: settings.store_currency || "USD",
+    sdgRate: parseFloat(settings.store_sdg_rate || "0"),
   })
 }
 

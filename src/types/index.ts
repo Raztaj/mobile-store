@@ -17,6 +17,13 @@ export interface Category {
   created_at: string
 }
 
+export interface ProductImage {
+  id: string
+  product_id: string
+  image_url: string
+  sort_order: number
+}
+
 export interface CartItem {
   id: string
   name: string

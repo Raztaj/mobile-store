@@ -5,21 +5,28 @@ import { CategoryFilter } from "@/components/category-filter"
 import { SearchBar } from "@/components/search-bar"
 import { T, Tplural } from "@/components/t"
 import { HeroSection } from "@/components/hero-section"
+import { FeaturedCarousel } from "@/components/featured-carousel"
 import type { Product, Category } from "@/types"
 
 async function getData(search?: string, categoryId?: string) {
   const supabase = createServerDataClient()
 
-  const [catResult, prodResult] = await Promise.all([
+  const [catResult, prodResult, featuredResult] = await Promise.all([
     supabase.from("categories").select("*").order("name"),
     supabase
       .from("products")
       .select("*, categories(*)")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("products")
+      .select("*, categories(*)")
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false }),
   ])
 
   let products = (prodResult.data || []) as Product[]
   const categories = (catResult.data || []) as Category[]
+  const featured = (featuredResult.data || []) as Product[]
 
   if (search) {
     const q = search.toLowerCase()
@@ -30,7 +37,7 @@ async function getData(search?: string, categoryId?: string) {
     products = products.filter((p) => p.category_id === categoryId)
   }
 
-  return { products, categories }
+  return { products, categories, featured }
 }
 
 export default async function HomePage({
@@ -39,7 +46,7 @@ export default async function HomePage({
   searchParams: Promise<{ search?: string; category?: string }>
 }) {
   const { search, category } = await searchParams
-  const { products, categories } = await getData(search, category)
+  const { products, categories, featured } = await getData(search, category)
   const hasActiveFilter = !!search || !!category
 
   const supabase = createServerDataClient()
@@ -60,6 +67,10 @@ export default async function HomePage({
           customDescAr={settings.hero_desc_ar}
           customDescEn={settings.hero_desc_en}
         />
+      )}
+
+      {!hasActiveFilter && featured.length > 0 && (
+        <FeaturedCarousel products={featured} />
       )}
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
