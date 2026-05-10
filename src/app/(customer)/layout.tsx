@@ -1,4 +1,6 @@
 import { Navbar } from "@/components/navbar"
+import { CartDrawer } from "@/components/cart-drawer"
+import { Footer } from "@/components/footer"
 
 export default function CustomerLayout({
   children,
@@ -8,9 +10,11 @@ export default function CustomerLayout({
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         {children}
       </main>
+      <Footer />
+      <CartDrawer />
     </>
   )
 }

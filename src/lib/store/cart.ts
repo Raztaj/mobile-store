@@ -4,6 +4,10 @@ import type { CartItem } from "@/types"
 
 interface CartState {
   items: CartItem[]
+  isCartOpen: boolean
+  openCart: () => void
+  closeCart: () => void
+  toggleCart: () => void
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
@@ -16,6 +20,11 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      isCartOpen: false,
+
+      openCart: () => set({ isCartOpen: true }),
+      closeCart: () => set({ isCartOpen: false }),
+      toggleCart: () => set((s) => ({ isCartOpen: !s.isCartOpen })),
 
       addItem: (item) => {
         const items = get().items
@@ -63,6 +72,6 @@ export const useCart = create<CartState>()(
         return get().items.reduce((count, item) => count + item.quantity, 0)
       },
     }),
-    { name: "mobile-store-cart" }
+    { name: "mobile-store-cart", partialize: (s) => ({ items: s.items }) }
   )
 )

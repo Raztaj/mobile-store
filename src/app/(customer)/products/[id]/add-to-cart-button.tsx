@@ -1,8 +1,8 @@
 "use client"
 
+import { ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/store/cart"
-import { toast } from "@/components/ui/toaster"
 import type { Product } from "@/types"
 
 interface AddToCartButtonProps {
@@ -12,6 +12,7 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({ product, disabled }: AddToCartButtonProps) {
   const addItem = useCart((s) => s.addItem)
+  const openCart = useCart((s) => s.openCart)
 
   return (
     <Button
@@ -25,9 +26,11 @@ export function AddToCartButton({ product, disabled }: AddToCartButtonProps) {
           image_url: product.image_url,
           quantity: 1,
         })
-        toast(`${product.name} added to cart`)
+        openCart()
       }}
+      className="w-full sm:w-auto rounded-xl text-base h-12 px-8 gap-2"
     >
+      <ShoppingCart className="h-5 w-5" />
       {disabled ? "Out of Stock" : "Add to Cart"}
     </Button>
   )

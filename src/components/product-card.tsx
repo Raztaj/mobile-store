@@ -3,12 +3,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ShoppingCart } from "lucide-react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/lib/store/cart"
-import { toast } from "@/components/ui/toaster"
 import type { Product } from "@/types"
 
 interface ProductCardProps {
@@ -17,6 +15,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCart((s) => s.addItem)
+  const openCart = useCart((s) => s.openCart)
+  const outOfStock = product.stock_quantity <= 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -28,21 +28,19 @@ export function ProductCard({ product }: ProductCardProps) {
       image_url: product.image_url,
       quantity: 1,
     })
-    toast(`${product.name} added to cart`)
+    openCart()
   }
 
-  const outOfStock = product.stock_quantity <= 0
-
   return (
-    <Link href={`/products/${product.id}`}>
-      <Card className="group h-full overflow-hidden transition-shadow hover:shadow-md">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+    <div className="group relative">
+      <Link href={`/products/${product.id}`}>
+        <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
           {product.image_url ? (
             <Image
               src={product.image_url}
               alt={product.name}
               fill
-              className="object-cover transition-transform group-hover:scale-105"
+              className="object-cover transition-all duration-500 group-hover:scale-110"
               sizes="(max-width: 768px) 50vw, 25vw"
             />
           ) : (
@@ -55,35 +53,35 @@ export function ProductCard({ product }: ProductCardProps) {
               Out of Stock
             </Badge>
           )}
-          {product.categories && (
-            <Badge variant="secondary" className="absolute right-2 top-2">
-              {product.categories.name}
-            </Badge>
-          )}
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
         </div>
-        <CardContent className="p-3">
-          <h3 className="line-clamp-1 font-medium text-sm">{product.name}</h3>
-          {product.description && (
-            <p className="line-clamp-1 text-xs text-muted-foreground mt-0.5">
-              {product.description}
-            </p>
-          )}
-          <p className="font-semibold text-sm mt-1">
-            {formatPrice(Number(product.price))}
+      </Link>
+
+      <div className="mt-3 space-y-1.5">
+        {product.categories && (
+          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {product.categories.name}
           </p>
-        </CardContent>
-        <CardFooter className="p-3 pt-0">
-          <Button
-            size="sm"
-            className="w-full"
-            disabled={outOfStock}
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="mr-1 h-3.5 w-3.5" />
-            {outOfStock ? "Out of Stock" : "Add to Cart"}
-          </Button>
-        </CardFooter>
-      </Card>
-    </Link>
+        )}
+        <Link href={`/products/${product.id}`}>
+          <h3 className="font-medium text-sm leading-tight hover:text-primary transition-colors line-clamp-1">
+            {product.name}
+          </h3>
+        </Link>
+        <p className="font-bold text-base">
+          {formatPrice(Number(product.price))}
+        </p>
+      </div>
+
+      <Button
+        size="sm"
+        className="mt-3 w-full rounded-lg opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+        disabled={outOfStock}
+        onClick={handleAddToCart}
+      >
+        <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+        {outOfStock ? "Out of Stock" : "Add to Cart"}
+      </Button>
+    </div>
   )
 }
