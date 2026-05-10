@@ -29,6 +29,9 @@ export function Footer() {
         <div className="mt-6 border-t pt-4 text-center text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} {STORE_NAME}. {t("footer.rights")}.
         </div>
+        <p className="mt-2 text-center text-[10px] text-muted-foreground/60">
+          Powered by Shockwave Software &copy;2026
+        </p>
       </div>
     </footer>
   )
