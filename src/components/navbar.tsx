@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingCart, Search, Store } from "lucide-react"
+import { ShoppingCart, Search, Store, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCart } from "@/lib/store/cart"
 import { STORE_NAME } from "@/lib/constants"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/lib/i18n"
 
 export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -15,6 +16,7 @@ export function Navbar() {
   const itemCount = useCart((s) => s.getItemCount())
   const openCart = useCart((s) => s.openCart)
   const router = useRouter()
+  const { t, toggleLang } = useTranslation()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +44,7 @@ export function Navbar() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 autoFocus
-                placeholder="Search products..."
+                placeholder={t("nav.search")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-9 pl-9 rounded-full bg-muted/50 border-none"
@@ -55,7 +57,7 @@ export function Navbar() {
               onClick={() => setSearchOpen(false)}
               className="rounded-full"
             >
-              Cancel
+              {t("nav.cancel")}
             </Button>
           </form>
         ) : (
@@ -65,7 +67,7 @@ export function Navbar() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Search products..."
+                    placeholder={t("nav.search")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-9 pl-9 rounded-full bg-muted/50 border-none"
@@ -78,7 +80,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search"
+              aria-label={t("common.search")}
               className="sm:hidden rounded-full"
             >
               <Search className="h-5 w-5" />
@@ -88,9 +90,19 @@ export function Navbar() {
 
         <Button
           variant="ghost"
+          size="sm"
+          onClick={toggleLang}
+          className="rounded-full gap-1.5 text-xs font-medium"
+        >
+          <Languages className="h-3.5 w-3.5" />
+          {t("lang.switch")}
+        </Button>
+
+        <Button
+          variant="ghost"
           size="icon"
           onClick={openCart}
-          aria-label="Cart"
+          aria-label={t("nav.cart")}
           className="relative rounded-full"
         >
           <ShoppingCart className="h-5 w-5" />

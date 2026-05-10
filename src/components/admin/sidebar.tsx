@@ -13,16 +13,18 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { logout } from "@/lib/supabase/actions"
+import { useTranslation } from "@/lib/i18n"
 
 const links = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: ShoppingBag },
-  { href: "/admin/categories", label: "Categories", icon: Tags },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/dashboard", labelKey: "admin.dashboard", icon: LayoutDashboard },
+  { href: "/admin/products", labelKey: "admin.products", icon: ShoppingBag },
+  { href: "/admin/categories", labelKey: "admin.categories", icon: Tags },
+  { href: "/admin/settings", labelKey: "admin.settings", icon: Settings },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
 
   return (
     <aside className="flex w-60 flex-col border-r bg-white">
@@ -33,7 +35,7 @@ export function AdminSidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
           <Store className="h-4 w-4 text-primary-foreground" />
         </div>
-        <span className="font-bold text-sm">Admin Panel</span>
+        <span className="font-bold text-sm">{t("admin.panel")}</span>
       </Link>
 
       <nav className="flex flex-col gap-0.5 p-3 flex-1">
@@ -50,7 +52,7 @@ export function AdminSidebar() {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {link.label}
+                {t(link.labelKey)}
               </Button>
             </Link>
           )
@@ -64,7 +66,7 @@ export function AdminSidebar() {
             className="w-full justify-start gap-2.5 h-9 text-sm font-normal text-destructive hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            {t("admin.logout")}
           </Button>
         </form>
       </div>

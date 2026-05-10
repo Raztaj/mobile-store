@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { useTranslation } from "@/lib/i18n"
 import type { Category } from "@/types"
 
 interface CategoryFilterProps {
@@ -11,6 +12,7 @@ interface CategoryFilterProps {
 export function CategoryFilter({ categories }: CategoryFilterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useTranslation()
   const selected = searchParams.get("category")
 
   const select = (id: string | null) => {
@@ -31,7 +33,7 @@ export function CategoryFilter({ categories }: CategoryFilterProps) {
         onClick={() => select(null)}
         className="shrink-0"
       >
-        All
+        {t("categories.all")}
       </Button>
       {categories.map((cat) => (
         <Button

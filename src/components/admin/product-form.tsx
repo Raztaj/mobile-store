@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { createProduct, updateProduct } from "@/lib/supabase/actions"
+import { useTranslation } from "@/lib/i18n"
 import type { Product, Category } from "@/types"
 
 interface ProductFormProps {
@@ -22,6 +23,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, categories }: ProductFormProps) {
+  const { t } = useTranslation()
   const action = product
     ? updateProduct.bind(null, product.id)
     : createProduct
@@ -41,7 +43,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   return (
     <form action={formAction} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="name">Product Name</Label>
+        <Label htmlFor="name">{t("admin.product_name")}</Label>
         <Input
           id="name"
           name="name"
@@ -52,7 +54,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("product.description")}</Label>
         <Textarea
           id="description"
           name="description"
@@ -64,7 +66,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Price ({process.env.NEXT_PUBLIC_STORE_CURRENCY || "USD"})</Label>
+          <Label htmlFor="price">{t("admin.price")} ({process.env.NEXT_PUBLIC_STORE_CURRENCY || "USD"})</Label>
           <Input
             id="price"
             name="price"
@@ -78,7 +80,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="stock_quantity">Stock Quantity</Label>
+          <Label htmlFor="stock_quantity">{t("admin.stock")}</Label>
           <Input
             id="stock_quantity"
             name="stock_quantity"
@@ -91,7 +93,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category_id">Category</Label>
+        <Label htmlFor="category_id">{t("admin.category")}</Label>
         <Select name="category_id" defaultValue={product?.category_id || ""}>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
@@ -108,7 +110,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="image">Product Image</Label>
+        <Label htmlFor="image">{t("admin.image")}</Label>
         <Input
           id="image"
           name="image"
@@ -140,7 +142,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           className="h-4 w-4 rounded border-gray-300"
         />
         <Label htmlFor="is_featured" className="text-sm font-normal">
-          Featured product
+          {t("admin.featured")}
         </Label>
       </div>
 
@@ -150,7 +152,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving..." : product ? "Update Product" : "Create Product"}
+          {pending ? t("admin.saving") : product ? t("admin.update") : t("admin.create")}
         </Button>
       </div>
     </form>

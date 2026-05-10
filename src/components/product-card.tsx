@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/lib/store/cart"
+import { useTranslation } from "@/lib/i18n"
 import type { Product } from "@/types"
 
 interface ProductCardProps {
@@ -16,6 +17,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCart((s) => s.addItem)
   const openCart = useCart((s) => s.openCart)
+  const { t } = useTranslation()
   const outOfStock = product.stock_quantity <= 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -45,12 +47,12 @@ export function ProductCard({ product }: ProductCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-              No Image
+              {t("product.no_image")}
             </div>
           )}
           {outOfStock && (
-            <Badge variant="destructive" className="absolute left-2 top-2">
-              Out of Stock
+            <Badge variant="destructive" className="absolute left-2 top-2 rtl:right-2">
+              {t("product.out_of_stock")}
             </Badge>
           )}
           <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
@@ -79,8 +81,8 @@ export function ProductCard({ product }: ProductCardProps) {
         disabled={outOfStock}
         onClick={handleAddToCart}
       >
-        <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
-        {outOfStock ? "Out of Stock" : "Add to Cart"}
+        <ShoppingCart className="me-1.5 h-3.5 w-3.5" />
+        {outOfStock ? t("product.out_of_stock") : t("product.add_to_cart")}
       </Button>
     </div>
   )

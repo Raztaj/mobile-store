@@ -19,8 +19,6 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-let toastId = 0
-
 export function ToastProvider({ children }: { children: ReactNode }) {
   return <>{children}</>
 }

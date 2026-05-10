@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createCategory, deleteCategory } from "@/lib/supabase/actions"
 import { toast } from "@/components/ui/toaster"
+import { useTranslation } from "@/lib/i18n"
 import type { Category } from "@/types"
 
 interface Props {
@@ -17,6 +18,7 @@ export function AdminCategoryManager({ categories }: Props) {
   const [name, setName] = useState("")
   const [pending, setPending] = useState(false)
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +29,7 @@ export function AdminCategoryManager({ categories }: Props) {
       fd.set("name", name.trim())
       await createCategory(fd)
       setName("")
-      toast("Category created")
+      toast(t("common.add"))
       router.refresh()
     } catch {
       toast("Failed to create category", "destructive")
@@ -39,7 +41,7 @@ export function AdminCategoryManager({ categories }: Props) {
   const handleDelete = async (id: string) => {
     try {
       await deleteCategory(id)
-      toast("Category deleted")
+      toast(t("common.delete"))
       router.refresh()
     } catch {
       toast("Failed to delete category", "destructive")
@@ -50,20 +52,20 @@ export function AdminCategoryManager({ categories }: Props) {
     <div className="space-y-4">
       <form onSubmit={handleAdd} className="flex gap-3">
         <Input
-          placeholder="New category name"
+          placeholder={t("admin.add_category")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <Button type="submit" disabled={pending || !name.trim()}>
-          {pending ? "Adding..." : "Add"}
+          {pending ? t("common.loading") : t("common.add")}
         </Button>
       </form>
 
       <div className="rounded-lg border">
         {categories.length === 0 ? (
           <p className="p-4 text-center text-muted-foreground text-sm">
-            No categories yet
+            {t("admin.no_categories")}
           </p>
         ) : (
           <ul className="divide-y">

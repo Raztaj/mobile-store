@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { LoginForm } from "./login-form"
+import { T } from "@/components/t"
 
 export default async function AdminLoginPage() {
   const supabase = await createServerSupabaseClient()
@@ -16,9 +17,9 @@ export default async function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Admin Login</h1>
+          <h1 className="text-2xl font-bold"><T k="admin.login" /></h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Sign in to manage your store
+            <T k="admin.login_desc" />
           </p>
         </div>
         <LoginForm />

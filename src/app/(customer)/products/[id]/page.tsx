@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft } from "lucide-react"
+import { T } from "@/components/t"
 import type { Product } from "@/types"
 
 async function getProduct(id: string) {
@@ -38,7 +39,7 @@ export default async function ProductPage({
         <Link href="/">
           <Button variant="ghost" size="sm" className="gap-1 rounded-full">
             <ArrowLeft className="h-4 w-4" />
-            Back to products
+            <T k="product.back" />
           </Button>
         </Link>
       </div>
@@ -56,7 +57,7 @@ export default async function ProductPage({
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              No Image
+              <T k="product.no_image" />
             </div>
           )}
         </div>
@@ -78,19 +79,19 @@ export default async function ProductPage({
 
           {product.description ? (
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
+              <h3 className="text-sm font-medium text-muted-foreground mb-1"><T k="product.description" /></h3>
               <p className="text-sm leading-relaxed">{product.description}</p>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground italic">No description provided</p>
+            <p className="text-sm text-muted-foreground italic"><T k="product.no_description" /></p>
           )}
 
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Availability:</span>
+            <span className="text-muted-foreground"><T k="product.availability" />:</span>
             {outOfStock ? (
-              <Badge variant="destructive">Out of Stock</Badge>
+              <Badge variant="destructive"><T k="product.out_of_stock" /></Badge>
             ) : (
-              <Badge variant="default" className="bg-green-600">{product.stock_quantity} in stock</Badge>
+              <Badge variant="default" className="bg-green-600"><T k="product.in_stock" vars={{ qty: product.stock_quantity }} /></Badge>
             )}
           </div>
 

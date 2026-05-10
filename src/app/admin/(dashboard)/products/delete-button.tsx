@@ -14,18 +14,20 @@ import {
 } from "@/components/ui/dialog"
 import { deleteProduct } from "@/lib/supabase/actions"
 import { toast } from "@/components/ui/toaster"
+import { useTranslation } from "@/lib/i18n"
 import { useState } from "react"
 
 export function DeleteButton({ id }: { id: string }) {
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleDelete = async () => {
     setPending(true)
     try {
       await deleteProduct(id)
-      toast("Product deleted")
+      toast(t("common.delete"))
       router.refresh()
       setOpen(false)
     } catch {
@@ -44,17 +46,17 @@ export function DeleteButton({ id }: { id: string }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Product</DialogTitle>
+          <DialogTitle>{t("admin.delete_confirm")}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this product? This action cannot be undone.
+            {t("admin.delete_desc")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" disabled={pending} onClick={handleDelete}>
-            {pending ? "Deleting..." : "Delete"}
+            {pending ? t("common.loading") : t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

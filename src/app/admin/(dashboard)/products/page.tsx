@@ -1,10 +1,11 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit } from "lucide-react"
 import { createServerDataClient } from "@/lib/supabase/server-data"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
+import { T } from "@/components/t"
 import { DeleteButton } from "./delete-button"
 import type { Product } from "@/types"
 
@@ -20,11 +21,11 @@ export default async function AdminProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold"><T k="admin.products" /></h1>
         <Link href="/admin/products/new">
           <Button className="gap-1">
             <Plus className="h-4 w-4" />
-            Add Product
+            <T k="admin.add_product" />
           </Button>
         </Link>
       </div>
@@ -34,18 +35,18 @@ export default async function AdminProductsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="text-left py-3 px-4 font-medium">Product</th>
-                <th className="text-left py-3 px-4 font-medium hidden sm:table-cell">Category</th>
-                <th className="text-right py-3 px-4 font-medium">Price</th>
-                <th className="text-right py-3 px-4 font-medium hidden sm:table-cell">Stock</th>
-                <th className="text-right py-3 px-4 font-medium">Actions</th>
+                <th className="text-left py-3 px-4 font-medium"><T k="admin.product_name" /></th>
+                <th className="text-left py-3 px-4 font-medium hidden sm:table-cell"><T k="admin.category" /></th>
+                <th className="text-right py-3 px-4 font-medium"><T k="admin.price" /></th>
+                <th className="text-right py-3 px-4 font-medium hidden sm:table-cell"><T k="admin.stock" /></th>
+                <th className="text-right py-3 px-4 font-medium"><T k="common.edit" /></th>
               </tr>
             </thead>
             <tbody>
               {(!products || products.length === 0) && (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-muted-foreground">
-                    No products yet
+                    <T k="admin.no_products" />
                   </td>
                 </tr>
               )}
@@ -81,7 +82,7 @@ export default async function AdminProductsPage() {
                   </td>
                   <td className="py-3 px-4 text-right hidden sm:table-cell">
                     {product.stock_quantity <= 0 ? (
-                      <Badge variant="destructive">Out of Stock</Badge>
+                      <Badge variant="destructive"><T k="product.out_of_stock" /></Badge>
                     ) : product.stock_quantity <= 5 ? (
                       <Badge variant="outline">{product.stock_quantity}</Badge>
                     ) : (

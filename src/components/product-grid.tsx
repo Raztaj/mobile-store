@@ -1,4 +1,7 @@
+"use client"
+
 import { ProductCard } from "@/components/product-card"
+import { useTranslation } from "@/lib/i18n"
 import type { Product } from "@/types"
 
 interface ProductGridProps {
@@ -6,6 +9,8 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
+  const { t } = useTranslation()
+
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -14,9 +19,9 @@ export function ProductGrid({ products }: ProductGridProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
         </div>
-        <p className="text-lg font-medium">No products found</p>
+        <p className="text-lg font-medium">{t("products.no_products")}</p>
         <p className="text-muted-foreground text-sm mt-1">
-          Try adjusting your search or filters
+          {t("products.adjust_search")}
         </p>
       </div>
     )

@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toaster"
+import { useTranslation } from "@/lib/i18n"
 
 interface SettingsFormProps {
   settings: Record<string, string>
 }
 
 export function SettingsForm({ settings }: SettingsFormProps) {
+  const { t } = useTranslation()
   const [phone, setPhone] = useState(settings.store_phone || "")
   const [name, setName] = useState(settings.store_name || "")
   const [currency, setCurrency] = useState(settings.store_currency || "USD")
@@ -30,10 +32,10 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       })
 
       if (!res.ok) throw new Error("Failed to save")
-      toast("Settings saved")
+      toast(t("admin.settings_saved"))
       router.refresh()
     } catch {
-      toast("Failed to save settings", "destructive")
+      toast(t("admin.settings_failed"), "destructive")
     } finally {
       setPending(false)
     }
@@ -42,7 +44,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm">
       <div className="space-y-2">
-        <Label htmlFor="phone">WhatsApp Phone Number</Label>
+        <Label htmlFor="phone">{t("admin.phone")}</Label>
         <Input
           id="phone"
           value={phone}
@@ -51,12 +53,12 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           required
         />
         <p className="text-xs text-muted-foreground">
-          Full international format, e.g. +249123456789
+          {t("admin.phone_hint")}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="name">Store Name</Label>
+        <Label htmlFor="name">{t("admin.store_name")}</Label>
         <Input
           id="name"
           value={name}
@@ -66,7 +68,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="currency">Currency</Label>
+        <Label htmlFor="currency">{t("admin.currency")}</Label>
         <Input
           id="currency"
           value={currency}
@@ -76,7 +78,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       </div>
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Saving..." : "Save Settings"}
+        {pending ? t("admin.saving") : t("common.save")}
       </Button>
     </form>
   )

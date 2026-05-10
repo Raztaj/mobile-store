@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CartContent } from "@/components/cart-content"
+import { T } from "@/components/t"
 
 export default function CartPage() {
   return (
@@ -10,7 +11,7 @@ export default function CartPage() {
         <Link href="/">
           <Button variant="ghost" size="sm" className="gap-1 rounded-full">
             <ArrowLeft className="h-4 w-4" />
-            Continue Shopping
+            <T k="cart.continue" />
           </Button>
         </Link>
       </div>
