@@ -4,13 +4,12 @@ import { LoginForm } from "./login-form"
 import { T } from "@/components/t"
 
 export default async function AdminLoginPage() {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (session) {
-    redirect("/admin/dashboard")
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) redirect("/admin/dashboard")
+  } catch {
+    // DB unreachable — show login form anyway
   }
 
   return (

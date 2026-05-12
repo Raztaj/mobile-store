@@ -7,12 +7,11 @@ export default async function AdminDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) redirect("/admin/login")
+  } catch {
     redirect("/admin/login")
   }
 

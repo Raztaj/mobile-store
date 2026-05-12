@@ -7,21 +7,25 @@ import { DashboardPhone } from "@/components/admin/dashboard-phone"
 export const dynamic = "force-dynamic"
 
 export default async function AdminDashboardPage() {
-  const supabase = createServerDataClient()
-
-  const [prodCount, catCount, lowStock, settings] = await Promise.all([
-    supabase.from("products").select("*", { count: "exact", head: true }),
-    supabase.from("categories").select("*", { count: "exact", head: true }),
-    supabase
-      .from("products")
-      .select("*")
-      .lte("stock_quantity", 5)
-      .gt("stock_quantity", 0),
-    supabase.from("store_settings").select("key, value"),
-  ])
-
+  let prodCount = 0
+  let catCount = 0
+  let lowStockCount = 0
   const settingsMap: Record<string, string> = {}
-  if (settings.data) for (const row of settings.data) settingsMap[row.key] = row.value
+  try {
+    const sup = createServerDataClient()
+    const [pc, cc, ls, s] = await Promise.all([
+      sup.from("products").select("*", { count: "exact", head: true }),
+      sup.from("categories").select("*", { count: "exact", head: true }),
+      sup.from("products").select("*").lte("stock_quantity", 5).gt("stock_quantity", 0),
+      sup.from("store_settings").select("key, value"),
+    ])
+    prodCount = pc.count ?? 0
+    catCount = cc.count ?? 0
+    lowStockCount = ls.data?.length ?? 0
+    if (s.data) for (const row of s.data) settingsMap[row.key] = row.value
+  } catch {
+    // DB unavailable
+  }
 
   return (
     <div className="space-y-6">
@@ -34,7 +38,7 @@ export default async function AdminDashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{prodCount.count ?? 0}</p>
+            <p className="text-3xl font-bold">{prodCount}</p>
           </CardContent>
         </Card>
 
@@ -44,7 +48,7 @@ export default async function AdminDashboardPage() {
             <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{catCount.count ?? 0}</p>
+            <p className="text-3xl font-bold">{catCount}</p>
           </CardContent>
         </Card>
 
@@ -54,10 +58,8 @@ export default async function AdminDashboardPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {lowStock.data?.length ?? 0}
-            </p>
-            {lowStock.data && lowStock.data.length > 0 && (
+            <p className="text-3xl font-bold">{lowStockCount}</p>
+            {lowStockCount > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
                 Products with &le;5 items remaining
               </p>

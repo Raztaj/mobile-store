@@ -12,15 +12,22 @@ import type { Product } from "@/types"
 export const dynamic = "force-dynamic"
 
 export default async function AdminProductsPage() {
-  const supabase = createServerDataClient()
-  const { data: settings } = await supabase.from("store_settings").select("key, value")
-  const settingsMap: Record<string, string> = {}
-  if (settings) for (const row of settings) settingsMap[row.key] = row.value
-  const sdgRate = parseFloat(settingsMap.store_sdg_rate || "600")
-  const { data: products } = await supabase
-    .from("products")
-    .select("*, categories(*)")
-    .order("created_at", { ascending: false })
+  let products: Product[] = []
+  let sdgRate = 600
+  try {
+    const supabase = createServerDataClient()
+    const { data: settings } = await supabase.from("store_settings").select("key, value")
+    const settingsMap: Record<string, string> = {}
+    if (settings) for (const row of settings) settingsMap[row.key] = row.value
+    sdgRate = parseFloat(settingsMap.store_sdg_rate || "600")
+    const { data: prods } = await supabase
+      .from("products")
+      .select("*, categories(*)")
+      .order("created_at", { ascending: false })
+    if (prods) products = prods as Product[]
+  } catch {
+    // DB unavailable
+  }
 
   return (
     <div className="space-y-6">

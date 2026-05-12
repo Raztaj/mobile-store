@@ -12,22 +12,27 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = createServerDataClient()
 
-  const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase.from("products").select("*, categories(*)").eq("id", id).single(),
-    supabase.from("categories").select("*").order("name"),
-  ])
+  let product: Product | null = null
+  let categories: Category[] = []
+  try {
+    const supabase = createServerDataClient()
+    const [{ data: prod }, { data: cats }] = await Promise.all([
+      supabase.from("products").select("*, categories(*)").eq("id", id).single(),
+      supabase.from("categories").select("*").order("name"),
+    ])
+    if (prod) product = prod as Product
+    if (cats) categories = cats as Category[]
+  } catch {
+    // DB unavailable
+  }
 
   if (!product) notFound()
 
   return (
     <div className="max-w-lg space-y-6">
       <h1 className="text-2xl font-bold"><T k="admin.edit_product" /></h1>
-      <ProductForm
-        product={product as Product}
-        categories={(categories || []) as Category[]}
-      />
+      <ProductForm product={product} categories={categories} />
     </div>
   )
 }
