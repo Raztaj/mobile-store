@@ -9,32 +9,40 @@ import { FeaturedCarousel } from "@/components/featured-carousel"
 import type { Product, Category } from "@/types"
 
 async function getData(search?: string, categoryId?: string) {
-  const supabase = createServerDataClient()
+  let products: Product[] = []
+  let categories: Category[] = []
+  let featured: Product[] = []
 
-  const [catResult, prodResult, featuredResult] = await Promise.all([
-    supabase.from("categories").select("*").order("name"),
-    supabase
-      .from("products")
-      .select("*, categories(*)")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("products")
-      .select("*, categories(*)")
-      .eq("is_featured", true)
-      .order("created_at", { ascending: false }),
-  ])
+  try {
+    const supabase = createServerDataClient()
 
-  let products = (prodResult.data || []) as Product[]
-  const categories = (catResult.data || []) as Category[]
-  const featured = (featuredResult.data || []) as Product[]
+    const [catResult, prodResult, featuredResult] = await Promise.all([
+      supabase.from("categories").select("*").order("name"),
+      supabase
+        .from("products")
+        .select("*, categories(*)")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("products")
+        .select("*, categories(*)")
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false }),
+    ])
 
-  if (search) {
-    const q = search.toLowerCase()
-    products = products.filter((p) => p.name.toLowerCase().includes(q))
-  }
+    products = (prodResult.data || []) as Product[]
+    categories = (catResult.data || []) as Category[]
+    featured = (featuredResult.data || []) as Product[]
 
-  if (categoryId) {
-    products = products.filter((p) => p.category_id === categoryId)
+    if (search) {
+      const q = search.toLowerCase()
+      products = products.filter((p) => p.name.toLowerCase().includes(q))
+    }
+
+    if (categoryId) {
+      products = products.filter((p) => p.category_id === categoryId)
+    }
+  } catch {
+    // DB unavailable
   }
 
   return { products, categories, featured }

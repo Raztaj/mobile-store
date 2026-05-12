@@ -9,15 +9,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  const { data: products } = await supabase.from("products").select("id, created_at")
-
-  const productUrls =
-    products?.map((p) => ({
-      url: `${baseUrl}/products/${p.id}`,
-      lastModified: p.created_at,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })) || []
+  let productUrls: { url: string; lastModified: Date; changeFrequency: "weekly"; priority: number }[] = []
+  try {
+    const { data: products } = await supabase.from("products").select("id, created_at")
+    if (products) {
+      productUrls = products.map((p) => ({
+        url: `${baseUrl}/products/${p.id}`,
+        lastModified: p.created_at,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }))
+    }
+  } catch {
+    // DB unavailable
+  }
 
   return [
     {

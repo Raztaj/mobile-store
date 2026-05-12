@@ -14,19 +14,23 @@ import { T } from "@/components/t"
 import type { Product } from "@/types"
 
 async function getProduct(id: string) {
-  const supabase = createServerDataClient()
-  const [prodResult, settingsResult] = await Promise.all([
-    supabase.from("products").select("*, categories(*)").eq("id", id).single(),
-    supabase.from("store_settings").select("key, value"),
-  ])
-  const product = prodResult.data as Product | null
-  const settings: Record<string, string> = {}
-  if (settingsResult.data) {
-    for (const row of settingsResult.data) {
-      settings[row.key] = row.value
+  try {
+    const supabase = createServerDataClient()
+    const [prodResult, settingsResult] = await Promise.all([
+      supabase.from("products").select("*, categories(*)").eq("id", id).single(),
+      supabase.from("store_settings").select("key, value"),
+    ])
+    const product = prodResult.data as Product | null
+    const settings: Record<string, string> = {}
+    if (settingsResult.data) {
+      for (const row of settingsResult.data) {
+        settings[row.key] = row.value
+      }
     }
+    return { product, sdgRate: parseFloat(settings.store_sdg_rate || "600") }
+  } catch {
+    return { product: null, sdgRate: 600 }
   }
-  return { product, sdgRate: parseFloat(settings.store_sdg_rate || "600") }
 }
 
 export async function generateMetadata({
