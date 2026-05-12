@@ -18,7 +18,7 @@ export async function login(formData: FormData) {
   if (error) throw new Error(error.message)
 
   revalidatePath("/admin", "layout")
-  redirect("/admin/dashboard")
+  return { success: true }
 }
 
 export async function logout() {
@@ -71,7 +71,7 @@ export async function createProduct(formData: FormData) {
   if (error) throw new Error(error.message)
 
   revalidatePath("/admin/products", "layout")
-  redirect("/admin/products")
+  return { success: true }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
@@ -119,7 +119,7 @@ export async function updateProduct(id: string, formData: FormData) {
   if (error) throw new Error(error.message)
 
   revalidatePath("/admin/products", "layout")
-  redirect("/admin/products")
+  return { success: true }
 }
 
 export async function deleteProduct(id: string) {

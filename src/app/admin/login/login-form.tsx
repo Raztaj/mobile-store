@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,18 +10,23 @@ import { useTranslation } from "@/lib/i18n"
 
 export function LoginForm() {
   const { t } = useTranslation()
+  const router = useRouter()
   const [state, formAction, pending] = useActionState(
     async (_prev: unknown, formData: FormData) => {
       try {
-        await login(formData)
+        return await login(formData)
       } catch (e) {
-        const err = e as Error & { digest?: string }
-        if (err.digest === "NEXT_REDIRECT") throw e
-        return { error: err.message }
+        return { error: (e as Error).message }
       }
     },
     null
   )
+
+  useEffect(() => {
+    if (state && "success" in state && state.success) {
+      router.push("/admin/dashboard")
+    }
+  }, [state, router])
 
   return (
     <form action={formAction} className="space-y-4">

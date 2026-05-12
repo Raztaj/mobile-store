@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +25,7 @@ interface ProductFormProps {
 
 export function ProductForm({ product, categories }: ProductFormProps) {
   const { t } = useTranslation()
+  const router = useRouter()
   const action = product
     ? updateProduct.bind(null, product.id)
     : createProduct
@@ -31,16 +33,19 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(
     async (_prev: unknown, formData: FormData) => {
       try {
-        await action(formData)
+        return await action(formData)
       } catch (e) {
-        const err = e as Error & { digest?: string }
-        if (err.digest === "NEXT_REDIRECT") throw e
-        return { error: err.message }
+        return { error: (e as Error).message }
       }
-      return null
     },
     null
   )
+
+  useEffect(() => {
+    if (state && "success" in state && state.success) {
+      router.push("/admin/products")
+    }
+  }, [state, router])
 
   return (
     <form action={formAction} className="space-y-6">
