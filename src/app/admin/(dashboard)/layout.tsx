@@ -11,7 +11,8 @@ export default async function AdminDashboardLayout({
     const supabase = await createServerSupabaseClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) redirect("/admin/login")
-  } catch {
+  } catch (e) {
+    if ((e as { digest?: string })?.digest === "NEXT_REDIRECT") throw e
     // DB unreachable — render the page anyway, let client handle auth
   }
 
