@@ -35,7 +35,8 @@ export async function createProduct(formData: FormData) {
   const name = formData.get("name") as string
   const description = formData.get("description") as string | null
   const price = parseFloat(formData.get("price") as string)
-  const category_id = formData.get("category_id") as string | null
+  let category_id = formData.get("category_id") as string | null
+  if (category_id === "none") category_id = null
   const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
   const is_featured = formData.get("is_featured") === "on"
 
@@ -63,7 +64,7 @@ export async function createProduct(formData: FormData) {
     description: description || null,
     price,
     image_url,
-    category_id: category_id || null,
+    category_id,
     stock_quantity,
     is_featured,
   })
@@ -80,7 +81,8 @@ export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get("name") as string
   const description = formData.get("description") as string | null
   const price = parseFloat(formData.get("price") as string)
-  const category_id = formData.get("category_id") as string | null
+  let category_id = formData.get("category_id") as string | null
+  if (category_id === "none") category_id = null
   const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
   const is_featured = formData.get("is_featured") === "on"
 
@@ -110,7 +112,7 @@ export async function updateProduct(id: string, formData: FormData) {
       description: description || null,
       price,
       image_url,
-      category_id: category_id || null,
+      category_id,
       stock_quantity,
       is_featured,
     })

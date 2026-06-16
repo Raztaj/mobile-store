@@ -101,12 +101,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="category_id">{t("admin.category")}</Label>
-        <Select name="category_id" defaultValue={product?.category_id || ""}>
+        <Select name="category_id" defaultValue={product?.category_id || "none"}>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No category</SelectItem>
+            <SelectItem value="none">No category</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
                 {cat.name}
