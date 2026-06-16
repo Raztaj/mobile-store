@@ -29,6 +29,19 @@ export async function logout() {
   redirect("/admin")
 }
 
+async function uploadImage(supabase: ReturnType<typeof createAdminClient>, file: File): Promise<string> {
+  const ext = file.name.split(".").pop()
+  const fileName = `${crypto.randomUUID()}.${ext}`
+  const { error: uploadError } = await supabase.storage
+    .from("products")
+    .upload(fileName, file)
+  if (uploadError) throw new Error(uploadError.message)
+  const { data: urlData } = supabase.storage
+    .from("products")
+    .getPublicUrl(fileName)
+  return urlData.publicUrl
+}
+
 export async function createProduct(formData: FormData) {
   const supabase = createAdminClient()
 
@@ -39,37 +52,43 @@ export async function createProduct(formData: FormData) {
   if (category_id === "none") category_id = null
   const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
   const is_featured = formData.get("is_featured") === "on"
+  const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
 
-  const image = formData.get("image") as File | null
-  let image_url: string | null = null
+  const files = formData.getAll("images") as File[]
+  const imageUrls: string[] = []
 
-  if (image && image.size > 0) {
-    const ext = image.name.split(".").pop()
-    const fileName = `${crypto.randomUUID()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from("products")
-      .upload(fileName, image)
-
-    if (uploadError) throw new Error(uploadError.message)
-
-    const { data: urlData } = supabase.storage
-      .from("products")
-      .getPublicUrl(fileName)
-
-    image_url = urlData.publicUrl
+  for (const f of files) {
+    if (f.size > 0) {
+      imageUrls.push(await uploadImage(supabase, f))
+    }
   }
 
-  const { error } = await supabase.from("products").insert({
-    name,
-    description: description || null,
-    price,
-    image_url,
-    category_id,
-    stock_quantity,
-    is_featured,
-  })
+  const { data: product, error } = await supabase
+    .from("products")
+    .insert({
+      name,
+      description: description || null,
+      price,
+      image_url: imageUrls[0] || null,
+      category_id,
+      stock_quantity,
+      is_featured,
+      colors,
+    })
+    .select("id")
+    .single()
 
   if (error) throw new Error(error.message)
+
+  if (imageUrls.length > 0) {
+    const rows = imageUrls.map((url, i) => ({
+      product_id: product.id,
+      image_url: url,
+      sort_order: i,
+    }))
+    const { error: imgErr } = await supabase.from("product_images").insert(rows)
+    if (imgErr) throw new Error(imgErr.message)
+  }
 
   revalidatePath("/admin/products", "layout")
   return { success: true }
@@ -85,25 +104,53 @@ export async function updateProduct(id: string, formData: FormData) {
   if (category_id === "none") category_id = null
   const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
   const is_featured = formData.get("is_featured") === "on"
+  const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
 
-  const image = formData.get("image") as File | null
-  let image_url = formData.get("existing_image_url") as string | null
+  const keepIds: string[] = JSON.parse(formData.get("existing_images") as string || "[]")
+  const files = formData.getAll("images") as File[]
 
-  if (image && image.size > 0) {
-    const ext = image.name.split(".").pop()
-    const fileName = `${crypto.randomUUID()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from("products")
-      .upload(fileName, image)
+  const { data: oldImages } = await supabase
+    .from("product_images")
+    .select("id, image_url")
+    .eq("product_id", id)
 
-    if (uploadError) throw new Error(uploadError.message)
-
-    const { data: urlData } = supabase.storage
-      .from("products")
-      .getPublicUrl(fileName)
-
-    image_url = urlData.publicUrl
+  const toDelete = (oldImages || []).filter((img) => !keepIds.includes(img.id))
+  for (const img of toDelete) {
+    const path = img.image_url.split("/").pop()
+    if (path) await supabase.storage.from("products").remove([path])
   }
+  if (toDelete.length > 0) {
+    await supabase.from("product_images").delete().in("id", toDelete.map((i) => i.id))
+  }
+
+  const newUrls: string[] = []
+  for (const f of files) {
+    if (f.size > 0) {
+      newUrls.push(await uploadImage(supabase, f))
+    }
+  }
+
+  if (newUrls.length > 0) {
+    const { data: existing } = await supabase
+      .from("product_images")
+      .select("image_url")
+      .eq("product_id", id)
+      .order("sort_order")
+    const maxOrder = existing ? existing.length : keepIds.length
+    const rows = newUrls.map((url, i) => ({
+      product_id: id,
+      image_url: url,
+      sort_order: maxOrder + i,
+    }))
+    const { error: imgErr } = await supabase.from("product_images").insert(rows)
+    if (imgErr) throw new Error(imgErr.message)
+  }
+
+  const { data: allImages } = await supabase
+    .from("product_images")
+    .select("image_url")
+    .eq("product_id", id)
+    .order("sort_order")
 
   const { error } = await supabase
     .from("products")
@@ -111,10 +158,11 @@ export async function updateProduct(id: string, formData: FormData) {
       name,
       description: description || null,
       price,
-      image_url,
+      image_url: allImages?.[0]?.image_url || null,
       category_id,
       stock_quantity,
       is_featured,
+      colors,
     })
     .eq("id", id)
 
@@ -122,6 +170,20 @@ export async function updateProduct(id: string, formData: FormData) {
 
   revalidatePath("/admin/products", "layout")
   return { success: true }
+}
+
+export async function deleteProductImage(imageId: string) {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("product_images")
+    .select("image_url, product_id")
+    .eq("id", imageId)
+    .single()
+  if (!data) return
+  const path = data.image_url.split("/").pop()
+  if (path) await supabase.storage.from("products").remove([path])
+  await supabase.from("product_images").delete().eq("id", imageId)
+  revalidatePath("/admin/products", "layout")
 }
 
 export async function deleteProduct(id: string) {

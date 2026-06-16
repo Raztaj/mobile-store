@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createServerDataClient } from "@/lib/supabase/server-data"
 import { AddToCartButton } from "./add-to-cart-button"
+import { ProductGallery } from "./product-gallery"
 import { formatPrice } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,22 +12,29 @@ import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Share2 } from "lucide-react"
 import { ShareWhatsApp } from "@/components/share-whatsapp"
 import { T } from "@/components/t"
-import type { Product } from "@/types"
+import { PHONE_COLORS } from "@/lib/phone-colors"
+import type { Product, ProductImage } from "@/types"
+
+const colorMap: Record<string, string> = {}
+for (const c of PHONE_COLORS) colorMap[c.name] = c.hex
 
 async function getProduct(id: string) {
   try {
     const supabase = createServerDataClient()
-    const [prodResult, settingsResult] = await Promise.all([
+    const [prodResult, settingsResult, imgResult] = await Promise.all([
       supabase.from("products").select("*, categories(*)").eq("id", id).single(),
       supabase.from("store_settings").select("key, value"),
+      supabase.from("product_images").select("*").eq("product_id", id).order("sort_order"),
     ])
     const product = prodResult.data as Product | null
+    const images = (imgResult.data || []) as ProductImage[]
     const settings: Record<string, string> = {}
     if (settingsResult.data) {
       for (const row of settingsResult.data) {
         settings[row.key] = row.value
       }
     }
+    if (product) product.images = images
     return { product, sdgRate: parseFloat(settings.store_sdg_rate || "600") }
   } catch {
     return { product: null, sdgRate: 600 }
@@ -64,6 +72,8 @@ export default async function ProductPage({
   const outOfStock = product.stock_quantity <= 0
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://mobile-store.vercel.app"
 
+  const images = product.images || []
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-4 flex items-center justify-between">
@@ -78,8 +88,10 @@ export default async function ProductPage({
 
       <div className="grid gap-8 sm:grid-cols-2">
         <div className="space-y-3">
-          <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
-            {product.image_url ? (
+          {images.length > 0 ? (
+            <ProductGallery images={images} productName={product.name} />
+          ) : product.image_url ? (
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
               <Image
                 src={product.image_url}
                 alt={product.name}
@@ -88,12 +100,12 @@ export default async function ProductPage({
                 sizes="(max-width: 640px) 100vw, 50vw"
                 priority
               />
-            ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground">
-                <T k="product.no_image" />
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex aspect-square items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+              <T k="product.no_image" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-5">
@@ -111,12 +123,34 @@ export default async function ProductPage({
             </div>
           </div>
 
+          {product.colors && product.colors.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                <T k="product.colors" />:
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <div
+                    key={color}
+                    className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs"
+                  >
+                    <span
+                      className="inline-block h-3 w-3 rounded-full border"
+                      style={{ backgroundColor: colorMap[color] || "#ccc" }}
+                    />
+                    {color}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Separator />
 
           {product.description ? (
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1"><T k="product.description" /></h3>
-              <p className="text-sm leading-relaxed">{product.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{product.description}</p>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground italic"><T k="product.no_description" /></p>

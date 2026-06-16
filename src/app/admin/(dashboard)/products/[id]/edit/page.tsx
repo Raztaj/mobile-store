@@ -17,11 +17,14 @@ export default async function EditProductPage({
   let categories: Category[] = []
   try {
     const supabase = createServerDataClient()
-    const [{ data: prod }, { data: cats }] = await Promise.all([
+    const [{ data: prod }, { data: cats }, { data: images }] = await Promise.all([
       supabase.from("products").select("*, categories(*)").eq("id", id).single(),
       supabase.from("categories").select("*").order("name"),
+      supabase.from("product_images").select("*").eq("product_id", id).order("sort_order"),
     ])
-    if (prod) product = prod as Product
+    if (prod) {
+      product = { ...prod, images: images || [] } as Product
+    }
     if (cats) categories = cats as Category[]
   } catch {
     // DB unavailable

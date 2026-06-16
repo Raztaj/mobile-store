@@ -7,8 +7,10 @@ export interface Product {
   category_id: string | null
   stock_quantity: number
   is_featured: boolean
+  colors: string[]
   created_at: string
   categories?: Category | null
+  images?: ProductImage[]
 }
 
 export interface Category {
