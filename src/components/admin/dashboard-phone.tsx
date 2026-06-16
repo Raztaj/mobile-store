@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone, Pencil } from "lucide-react"
 import { toast } from "@/components/ui/toaster"
+import { notifySettingsChanged } from "@/lib/use-settings"
 
 export function DashboardPhone({ phone: initial }: { phone: string }) {
   const [editing, setEditing] = useState(false)
@@ -23,6 +24,7 @@ export function DashboardPhone({ phone: initial }: { phone: string }) {
         body: JSON.stringify({ store_phone: phone }),
       })
       if (!res.ok) throw new Error()
+      notifySettingsChanged()
       toast("Phone number updated")
       router.refresh()
       setEditing(false)

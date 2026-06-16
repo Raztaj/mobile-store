@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { createServerDataClient } from "@/lib/supabase/server-data"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -44,6 +45,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }
+
+  revalidatePath("/api/settings", "layout")
+  revalidatePath("/", "layout")
 
   return NextResponse.json({ success: true })
 }

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toaster"
 import { useTranslation } from "@/lib/i18n"
+import { notifySettingsChanged } from "@/lib/use-settings"
 
 interface SettingsFormProps {
   settings: Record<string, string>
@@ -47,6 +48,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       })
 
       if (!res.ok) throw new Error("Failed to save")
+      notifySettingsChanged()
       toast(t("admin.settings_saved"))
       router.refresh()
     } catch {

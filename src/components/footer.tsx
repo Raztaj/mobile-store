@@ -1,19 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
 import { useTranslation } from "@/lib/i18n"
+import { useSettings } from "@/lib/use-settings"
 
 export function Footer() {
-  const [storeName, setStoreName] = useState("")
+  const { name: storeName } = useSettings()
   const { t } = useTranslation()
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((s) => { if (s.name) setStoreName(s.name) })
-      .catch(() => {})
-  }, [])
 
   return (
     <footer className="border-t bg-muted/30 mt-auto">

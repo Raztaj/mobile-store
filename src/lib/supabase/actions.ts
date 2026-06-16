@@ -35,7 +35,7 @@ async function uploadImage(supabase: ReturnType<typeof createAdminClient>, file:
   const { error: uploadError } = await supabase.storage
     .from("products")
     .upload(fileName, file)
-  if (uploadError) throw new Error(uploadError.message)
+  if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`)
   const { data: urlData } = supabase.storage
     .from("products")
     .getPublicUrl(fileName)
@@ -43,133 +43,141 @@ async function uploadImage(supabase: ReturnType<typeof createAdminClient>, file:
 }
 
 export async function createProduct(formData: FormData) {
-  const supabase = createAdminClient()
+  try {
+    const supabase = createAdminClient()
 
-  const name = formData.get("name") as string
-  const description = formData.get("description") as string | null
-  const price = parseFloat(formData.get("price") as string)
-  let category_id = formData.get("category_id") as string | null
-  if (category_id === "none") category_id = null
-  const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
-  const is_featured = formData.get("is_featured") === "on"
-  const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string | null
+    const price = parseFloat(formData.get("price") as string)
+    let category_id = formData.get("category_id") as string | null
+    if (category_id === "none") category_id = null
+    const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
+    const is_featured = formData.get("is_featured") === "on"
+    const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
 
-  const files = formData.getAll("images") as File[]
-  const imageUrls: string[] = []
+    const files = formData.getAll("images") as File[]
+    const imageUrls: string[] = []
 
-  for (const f of files) {
-    if (f.size > 0) {
-      imageUrls.push(await uploadImage(supabase, f))
+    for (const f of files) {
+      if (f.size > 0) {
+        imageUrls.push(await uploadImage(supabase, f))
+      }
     }
+
+    const { data: product, error } = await supabase
+      .from("products")
+      .insert({
+        name,
+        description: description || null,
+        price,
+        image_url: imageUrls[0] || null,
+        category_id,
+        stock_quantity,
+        is_featured,
+        colors,
+      })
+      .select("id")
+      .single()
+
+    if (error) return { error: error.message }
+
+    if (imageUrls.length > 0) {
+      const rows = imageUrls.map((url, i) => ({
+        product_id: product.id,
+        image_url: url,
+        sort_order: i,
+      }))
+      const { error: imgErr } = await supabase.from("product_images").insert(rows)
+      if (imgErr) return { error: imgErr.message }
+    }
+
+    revalidatePath("/admin/products", "layout")
+    return { success: true }
+  } catch (e) {
+    return { error: (e as Error).message || "An unexpected error occurred" }
   }
-
-  const { data: product, error } = await supabase
-    .from("products")
-    .insert({
-      name,
-      description: description || null,
-      price,
-      image_url: imageUrls[0] || null,
-      category_id,
-      stock_quantity,
-      is_featured,
-      colors,
-    })
-    .select("id")
-    .single()
-
-  if (error) throw new Error(error.message)
-
-  if (imageUrls.length > 0) {
-    const rows = imageUrls.map((url, i) => ({
-      product_id: product.id,
-      image_url: url,
-      sort_order: i,
-    }))
-    const { error: imgErr } = await supabase.from("product_images").insert(rows)
-    if (imgErr) throw new Error(imgErr.message)
-  }
-
-  revalidatePath("/admin/products", "layout")
-  return { success: true }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const supabase = createAdminClient()
+  try {
+    const supabase = createAdminClient()
 
-  const name = formData.get("name") as string
-  const description = formData.get("description") as string | null
-  const price = parseFloat(formData.get("price") as string)
-  let category_id = formData.get("category_id") as string | null
-  if (category_id === "none") category_id = null
-  const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
-  const is_featured = formData.get("is_featured") === "on"
-  const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string | null
+    const price = parseFloat(formData.get("price") as string)
+    let category_id = formData.get("category_id") as string | null
+    if (category_id === "none") category_id = null
+    const stock_quantity = parseInt(formData.get("stock_quantity") as string) || 0
+    const is_featured = formData.get("is_featured") === "on"
+    const colors: string[] = JSON.parse(formData.get("colors") as string || "[]")
 
-  const keepIds: string[] = JSON.parse(formData.get("existing_images") as string || "[]")
-  const files = formData.getAll("images") as File[]
+    const keepIds: string[] = JSON.parse(formData.get("existing_images") as string || "[]")
+    const files = formData.getAll("images") as File[]
 
-  const { data: oldImages } = await supabase
-    .from("product_images")
-    .select("id, image_url")
-    .eq("product_id", id)
+    const { data: oldImages } = await supabase
+      .from("product_images")
+      .select("id, image_url")
+      .eq("product_id", id)
 
-  const toDelete = (oldImages || []).filter((img) => !keepIds.includes(img.id))
-  for (const img of toDelete) {
-    const path = img.image_url.split("/").pop()
-    if (path) await supabase.storage.from("products").remove([path])
-  }
-  if (toDelete.length > 0) {
-    await supabase.from("product_images").delete().in("id", toDelete.map((i) => i.id))
-  }
-
-  const newUrls: string[] = []
-  for (const f of files) {
-    if (f.size > 0) {
-      newUrls.push(await uploadImage(supabase, f))
+    const toDelete = (oldImages || []).filter((img) => !keepIds.includes(img.id))
+    for (const img of toDelete) {
+      const path = img.image_url.split("/").pop()
+      if (path) await supabase.storage.from("products").remove([path])
     }
-  }
+    if (toDelete.length > 0) {
+      await supabase.from("product_images").delete().in("id", toDelete.map((i) => i.id))
+    }
 
-  if (newUrls.length > 0) {
-    const { data: existing } = await supabase
+    const newUrls: string[] = []
+    for (const f of files) {
+      if (f.size > 0) {
+        newUrls.push(await uploadImage(supabase, f))
+      }
+    }
+
+    if (newUrls.length > 0) {
+      const { data: existing } = await supabase
+        .from("product_images")
+        .select("image_url")
+        .eq("product_id", id)
+        .order("sort_order")
+      const maxOrder = existing ? existing.length : keepIds.length
+      const rows = newUrls.map((url, i) => ({
+        product_id: id,
+        image_url: url,
+        sort_order: maxOrder + i,
+      }))
+      const { error: imgErr } = await supabase.from("product_images").insert(rows)
+      if (imgErr) return { error: imgErr.message }
+    }
+
+    const { data: allImages } = await supabase
       .from("product_images")
       .select("image_url")
       .eq("product_id", id)
       .order("sort_order")
-    const maxOrder = existing ? existing.length : keepIds.length
-    const rows = newUrls.map((url, i) => ({
-      product_id: id,
-      image_url: url,
-      sort_order: maxOrder + i,
-    }))
-    const { error: imgErr } = await supabase.from("product_images").insert(rows)
-    if (imgErr) throw new Error(imgErr.message)
+
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name,
+        description: description || null,
+        price,
+        image_url: allImages?.[0]?.image_url || null,
+        category_id,
+        stock_quantity,
+        is_featured,
+        colors,
+      })
+      .eq("id", id)
+
+    if (error) return { error: error.message }
+
+    revalidatePath("/admin/products", "layout")
+    return { success: true }
+  } catch (e) {
+    return { error: (e as Error).message || "An unexpected error occurred" }
   }
-
-  const { data: allImages } = await supabase
-    .from("product_images")
-    .select("image_url")
-    .eq("product_id", id)
-    .order("sort_order")
-
-  const { error } = await supabase
-    .from("products")
-    .update({
-      name,
-      description: description || null,
-      price,
-      image_url: allImages?.[0]?.image_url || null,
-      category_id,
-      stock_quantity,
-      is_featured,
-      colors,
-    })
-    .eq("id", id)
-
-  if (error) throw new Error(error.message)
-
-  revalidatePath("/admin/products", "layout")
-  return { success: true }
 }
 
 export async function deleteProductImage(imageId: string) {

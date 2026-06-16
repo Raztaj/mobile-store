@@ -5,25 +5,19 @@ import { ShoppingCart, Search, Store, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCart } from "@/lib/store/cart"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
+import { useSettings } from "@/lib/use-settings"
 
 export function Navbar() {
-  const [storeName, setStoreName] = useState("")
+  const { name: storeName } = useSettings()
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const itemCount = useCart((s) => s.getItemCount())
   const openCart = useCart((s) => s.openCart)
   const router = useRouter()
   const { t, toggleLang } = useTranslation()
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((s) => { if (s.name) setStoreName(s.name) })
-      .catch(() => {})
-  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

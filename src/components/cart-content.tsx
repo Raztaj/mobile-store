@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -11,23 +10,13 @@ import { useCart } from "@/lib/store/cart"
 import { generateWhatsAppMessage } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
 import { useSdgRate } from "@/components/sdg-rate-provider"
+import { useSettings } from "@/lib/use-settings"
 
 export function CartContent() {
   const { items, removeItem, updateQuantity, clearCart, getSubtotal } = useCart()
   const { t } = useTranslation()
   const sdgRate = useSdgRate()
-  const [phone, setPhone] = useState("+249123456789")
-  const [currency, setCurrency] = useState("USD")
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((s) => {
-        if (s.phone) setPhone(s.phone)
-        if (s.currency) setCurrency(s.currency)
-      })
-      .catch(() => {})
-  }, [])
+  const { phone, currency } = useSettings()
 
   if (items.length === 0) {
     return (
