@@ -17,11 +17,15 @@ export function CartContent() {
   const { t } = useTranslation()
   const sdgRate = useSdgRate()
   const [phone, setPhone] = useState("+249123456789")
+  const [currency, setCurrency] = useState("USD")
 
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
-      .then((s) => { if (s.phone) setPhone(s.phone) })
+      .then((s) => {
+        if (s.phone) setPhone(s.phone)
+        if (s.currency) setCurrency(s.currency)
+      })
       .catch(() => {})
   }, [])
 
@@ -45,7 +49,7 @@ export function CartContent() {
   }
 
   const subtotal = getSubtotal()
-  const message = generateWhatsAppMessage(items, subtotal)
+  const message = generateWhatsAppMessage(items, subtotal, currency)
   const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 
   return (

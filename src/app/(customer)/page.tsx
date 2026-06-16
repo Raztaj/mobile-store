@@ -70,6 +70,7 @@ export default async function HomePage({
     <div className="space-y-8">
       {!hasActiveFilter && (
         <HeroSection
+          storeName={settings.store_name}
           customTitleAr={settings.hero_title_ar}
           customTitleEn={settings.hero_title_en}
           customDescAr={settings.hero_desc_ar}

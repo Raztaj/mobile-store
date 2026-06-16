@@ -1,18 +1,26 @@
 "use client"
 
 import Link from "next/link"
-import { STORE_NAME } from "@/lib/constants"
+import { useState, useEffect } from "react"
 import { useTranslation } from "@/lib/i18n"
 
 export function Footer() {
+  const [storeName, setStoreName] = useState("")
   const { t } = useTranslation()
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => { if (s.name) setStoreName(s.name) })
+      .catch(() => {})
+  }, [])
 
   return (
     <footer className="border-t bg-muted/30 mt-auto">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-center sm:text-left">
-            <p className="font-semibold text-sm">{STORE_NAME}</p>
+            <p className="font-semibold text-sm">{storeName || "Store"}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {t("footer.desc")}
             </p>
@@ -27,7 +35,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-6 border-t pt-4 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} {STORE_NAME}. {t("footer.rights")}.
+          &copy; {new Date().getFullYear()} {storeName || "Store"}. {t("footer.rights")}.
         </div>
         <p className="mt-2 text-center text-[10px] text-muted-foreground/60">
           Powered by Shockwave Software &copy;2026

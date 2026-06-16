@@ -3,22 +3,23 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useTranslation } from "@/lib/i18n"
-import { STORE_NAME } from "@/lib/constants"
 
 interface HeroSectionProps {
+  storeName?: string
   customTitleAr?: string
   customTitleEn?: string
   customDescAr?: string
   customDescEn?: string
 }
 
-export function HeroSection({ customTitleAr, customTitleEn, customDescAr, customDescEn }: HeroSectionProps) {
+export function HeroSection({ storeName, customTitleAr, customTitleEn, customDescAr, customDescEn }: HeroSectionProps) {
   const { t, lang } = useTranslation()
 
+  const name = storeName || "Store"
   const title =
     lang === "ar"
-      ? customTitleAr || t("hero.welcome", { store: STORE_NAME })
-      : customTitleEn || t("hero.welcome", { store: STORE_NAME })
+      ? customTitleAr || t("hero.welcome", { store: name })
+      : customTitleEn || t("hero.welcome", { store: name })
 
   const description =
     lang === "ar"
